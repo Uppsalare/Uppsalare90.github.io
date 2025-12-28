@@ -1,0 +1,133 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f6f8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.footer-text {
+  text-align: center;
+  padding: 10px 0;
+  font-size: 14px;
+  color: #666;
+  background: #f4f6f8;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: Arial, sans-serif;
+  margin-top: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+thead {
+  background-color: #004080; 
+  color: white;
+}
+
+thead th {
+  padding: 0.6rem;
+  text-align: left;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+}
+
+tbody td {
+  padding: 0.6rem;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 0.9rem;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #eaecf5;
+}
+
+tbody tr:hover {
+  background-color: #cddceb;
+}
+
+td:nth-child(3), td:nth-child(4) {
+  text-align: center;
+}
+
+.up {
+  color: green;
+  font-weight: bold;
+}
+
+.down {
+  color: red;
+  font-weight: bold;
+}
+
+.neutral {
+  color: gray;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+#openPageBtn {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  margin-top: 50%;
+  font-size: 1rem;
+  background-color: #004080;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#openPageBtn:hover {
+  background-color: #0066cc;
+}
+
+.tables-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px; 
+  flex-wrap: wrap; 
+  margin-top: 20px;
+}
+
+.player-list, .player-list-fpo {
+  flex: 1;
+  min-width: 320px; 
+  max-width: 500px;
+}
+
+.player-list table, .player-list-fpo table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.player-list th, .player-list-fpo th {
+  background-color: #004080;
+  color: white;
+  padding: 8px;
+}
+
+.player-list-fpo th {
+  background-color: #800040; 
+}
+
+.player-list td, .player-list-fpo td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  text-align: center;
+}
