@@ -138,7 +138,7 @@ function renderPlayerList() {
     listDiv.innerHTML = `
       <table>
         <thead>
-          <tr><th># MPO</th><th>Name</th><th>PDGA</th><th>Rating</th></tr>
+          <tr><th>#MPO</th><th>Name</th><th>PDGA</th><th>Rating</th></tr>
         </thead>
         <tbody>${rows}</tbody>
       </table>
