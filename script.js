@@ -1,110 +1,242 @@
-let playerList2 = [];
-const playerPdgaId = ["75216", "77535", "77547", "85225", "85229", "92342", "98755", "99121", "106897", "107746", "107764", "183456", "200855","259085", "289988","292238"];
 
-let playerList = [];
+const playerPdgaId = new Set([
+  "75216", "75285", "77535", "77547", "85225", "85229",
+  "92342", "98755", "99121", "106897", "107746", "107488",
+  "107764", "114085", "183456", "200855", "220960",
+  "231698", "247940", "250501", "253259", "259085",
+  "261443", "289988", "292238", "324942"
+]);
 
-window.onload = async () => {
-  await fetchTournamentPlayers("https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=91781&Division=MPO");
-  await fetchTournamentPlayers("https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=91781&Division=MP40");
-  await getPlayerFromTournment("https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=61835&Division=MPO","92342")
-  await getPlayerFromTournment("https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=61835&Division=MPO","107764")
-  await getPlayerFromTournment("https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=61835&Division=FPO","107746") 
-  await getPlayerFromTournment("https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=51107&Division=MA2","98755")
-  await getPlayerFromTournment("https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=85113&Division=MJ18","292238")
-  await getPlayerFromTournment("https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=94759&Division=MA3","85225")
+const playerList = new Map();
+
+const requests = [
+  {
+    type: "tournament",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=91781&Division=MPO"
+  },
+  {
+    type: "tournament",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=91781&Division=MP40"
+  },
+
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=61835&Division=MPO",
+    pdgaNum: "92342"
+  },
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=61835&Division=MPO",
+    pdgaNum: "107764"
+  },
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=61835&Division=FPO",
+    pdgaNum: "107746"
+  },
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=51107&Division=MA2",
+    pdgaNum: "98755"
+  },
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=85113&Division=MJ18",
+    pdgaNum: "292238"
+  },
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=94759&Division=MA3",
+    pdgaNum: "85225"
+  },
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=103092&Division=MA4",
+    pdgaNum: "220960"
+  },
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=104367&Division=FA3",
+    pdgaNum: "324942"
+  },
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=53584&Division=MA3",
+    pdgaNum: "107488"
+  },
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=83155&Division=MA4",
+    pdgaNum: "253259"
+  },
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=70970&Division=MA4",
+    pdgaNum: "231698"
+  },
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=70970&Division=MA3",
+    pdgaNum: "261443"
+  },
+  {
+    type: "player",
+    url: "https://www.pdga.com/apps/tournament/live-api/live_results_fetch_round?TournID=70970&Division=MA3",
+    pdgaNum: "114085"
+  }
+];
+
+window.addEventListener("load", async () => {
+  await Promise.all(
+    requests.map(request => fetchRequest(request))
+  );
+
   renderPlayerList();
-};
+});
 
-async function getPlayerFromTournment(url, pdgaNum) {
-      try {
-    const resp = await fetch(url, { headers: { Accept: "application/json" } });
-    if (!resp.ok) throw new Error(`Fel vid hämtning: ${resp.status}`);
 
-    const data = await resp.json();
+async function fetchRequest(request) {
+  try {
+    const response = await fetch(request.url, {
+      headers: {
+        Accept: "application/json"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
     const scores = data?.data?.scores;
 
     if (!Array.isArray(scores)) {
-      return null;
-    }
-
-    const player = scores.find(
-      s => String(s.PDGANum) === String(pdgaNum)
-    );
-
-    if (!player) {
-      return null;
-    }
-
-    const name = player.Name ?? player.name ?? "—";
-    const rating = player.Rating ?? player.rating ?? null;
-    const pdga = player.PDGANum ?? player.pdga_number ?? pdgaNum;
-
-    const exists = playerList.some(p => String(p.pdgaNum) === String(pdga));
-
-    const isPlayerOneOfList = playerPdgaId.includes(String(pdga));    
-
-    if (!exists && isPlayerOneOfList && rating && !isNaN(rating)) {
-      playerList.push({ name, pdgaNum, rating});
-    } 
-
-    return ;
-  } catch (err) {
-    return null;
-  }
-}
-
-async function fetchTournamentPlayers(url) {
-    try {
-    const resp = await fetch(url, { headers: { Accept: "application/json" } });
-
-    if (!resp.ok) throw new Error(`Felaktig statuskod: ${resp.status}`);
-    const data = await resp.json();
-
-    const scores = data?.data?.scores;
-    if (!Array.isArray(scores) || !scores.length) {
       return;
     }
 
-for (const s of scores) {
-  const name = s.Name;
-  const pdgaNum = s.PDGANum;
-  const rating = s.Rating ?? null;
+    if (request.type === "player") {
+      const player = scores.find(
+        s => String(s.PDGANum) === String(request.pdgaNum)
+      );
 
-    const exists = playerList.some(p => String(p.pdgaNum) === String(pdgaNum));
-    const isPlayerOneOfList = playerPdgaId.includes(String(pdgaNum));    
-
-  if (!exists && isPlayerOneOfList && rating && !isNaN(rating)) {
-    playerList.push({ name, pdgaNum, rating });  
+      if (player) {
+        addPlayer(player);
       }
+
+      return;
     }
-  } catch (err) {
+
+    for (const player of scores) {
+      addPlayer(player);
+    }
+
+  } catch (error) {
+    console.error("Kunde inte hämta:", request.url, error);
   }
 }
 
-function renderPlayerList() {
-    playerList.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-  const listDiv = document.getElementById("playerList");
 
-  if (!playerList.length) {
-    listDiv.innerHTML = `<p style="font-weight:bold;">⚠️ Inga spelardata hittades. Kolla konsolen (F12) för mer info.</p>`;
+function addPlayer(player) {
+  const pdgaNum = String(
+    player.PDGANum ??
+    player.pdga_number ??
+    ""
+  );
+
+  const name =
+    player.Name ??
+    player.name ??
+    "—";
+
+  const rating =
+    player.Rating ??
+    player.rating ??
+    null;
+
+  if (!playerPdgaId.has(pdgaNum)) {
     return;
   }
 
-  const rows = playerList.map((p, i) => `
-    <tr>
-      <td>${i + 1}</td>
-      <td>${p.pdgaNum !== "—" ? `<a href="https://www.pdga.com/player/${p.pdgaNum}" target="_blank">${p.name}</a>` : p.name}</td>
-      <td>${p.pdgaNum?? "—"}</td>
-      <td>${p.rating ?? "—"}</td>
-    </tr>
-  `).join("");
+  // Rating måste vara ett giltigt nummer
+  if (rating === null || rating === "" || isNaN(rating)) {
+    return;
+  }
+
+  if (playerList.has(pdgaNum)) {
+    return;
+  }
+
+  playerList.set(pdgaNum, {
+    name,
+    pdgaNum,
+    rating
+  });
+}
+
+
+function renderPlayerList() {
+  const listDiv = document.getElementById("playerList");
+
+  if (!listDiv) {
+    return;
+  }
+
+  const players = Array.from(playerList.values())
+    .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+
+  if (!players.length) {
+    listDiv.innerHTML = `
+      <p style="font-weight:bold;">
+        ⚠️ Inga spelardata hittades.
+        Kolla konsolen (F12) för mer info.
+      </p>
+    `;
+    return;
+  }
+
+  const rows = players.map((player, index) => {
+    const pdgaLink = player.pdgaNum
+      ? `<a href="https://www.pdga.com/player/${player.pdgaNum}"
+           target="_blank"
+           rel="noopener noreferrer">
+           ${escapeHtml(player.name)}
+         </a>`
+      : escapeHtml(player.name);
+
+    return `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${pdgaLink}</td>
+        <td>${player.pdgaNum}</td>
+        <td>${player.rating}</td>
+      </tr>
+    `;
+  }).join("");
 
   listDiv.innerHTML = `
     <table>
       <thead>
-        <tr><th>#</th><th>Name</th><th>PDGA #</th><th>Rating</th></tr>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>PDGA #</th>
+          <th>Rating</th>
+        </tr>
       </thead>
-      <tbody>${rows}</tbody>
+      <tbody>
+        ${rows}
+      </tbody>
     </table>
   `;
 }
+
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
